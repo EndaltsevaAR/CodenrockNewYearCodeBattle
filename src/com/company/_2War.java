@@ -41,7 +41,7 @@ Description:
 
 import java.util.Scanner;
 
-public class War {
+public class _2War {
     public static void main(String[] args) throws java.lang.Exception {
         Scanner sc = new Scanner(System.in); //System.in is a standard input stream
 

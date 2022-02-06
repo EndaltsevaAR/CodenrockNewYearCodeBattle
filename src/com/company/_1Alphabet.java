@@ -16,7 +16,7 @@ MR Robot
 
 import java.util.Scanner;
 
-public class Alphabet {
+public class _1Alphabet {
 
     public static void main(String[] args) throws java.lang.Exception {
         Scanner sc = new Scanner(System.in); //System.in is a standard input stream
