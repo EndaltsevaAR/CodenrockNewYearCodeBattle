@@ -13,7 +13,7 @@ RLE - самый простой алгоритм сжатия. Его суть �
 
 import java.util.Scanner;
 
-public class RLE {
+public class _4RLE {
     public static void main(String[] args) throws java.lang.Exception {
         Scanner sc = new Scanner(System.in); //System.in is a standard input stream
 
