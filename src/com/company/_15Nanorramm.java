@@ -7,16 +7,16 @@ import java.util.Scanner;
 import java.util.stream.Collectors;
 
 public class _15Nanorramm {
-    private static final String fullCeil = "X";
-    private static final String gapCeil = ".";
+    private static final String FULL_CElL = "X   ";   //TEMP!!!
+    private static final String GAP_CElL = ".   ";    //TEMP!!!
 
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in); //System.in is a standard input stream
         String line = "";
         int countSpaces = 0;
         boolean changeList = false;
-        List<List<Integer>> horizLines = new ArrayList<>();
-        List<List<Integer>> vertLines = new ArrayList<>();
+        List<List<Integer>> horizLines = new ArrayList<>();      //horizontal clues for columns
+        List<List<Integer>> vertLines = new ArrayList<>();       //vertical clues for rows
 
         while (sc.hasNextLine()) {   //convert input data of clues to lists
             line = sc.nextLine();
@@ -43,9 +43,16 @@ public class _15Nanorramm {
 
         String[][] picture = new String[vertLines.size()][horizLines.size()];   //creating empty array
 
+
         //     while (!isSolved(picture)) {
-        picture = usingHorizonClues(picture, horizLines);       //pass through horizontal clues
-        picture = usingVertClues(picture, vertLines);         //pass through vertical clues
+        usingHorizonClues(picture, horizLines);       //pass through horizontal clues
+        usingVertClues(picture, vertLines);         //pass through vertical clues
+/*
+Этапы проверок:
+- проверить подсказки, проставить пробелы
+- по списку
+
+ */
 
 
         for (int i = 0; i < picture[0].length; i++) {  //test
@@ -57,49 +64,62 @@ public class _15Nanorramm {
         //   }
     }
 
-    private static String[][] usingHorizonClues(String[][] picture, List<List<Integer>> gorizLines) { //check columns
+    private static void usingHorizonClues(String[][] picture, List<List<Integer>> horizLines) { //check columns
         for (int i = 0; i < picture[0].length; i++) {  //moving along the x
             String[] column = new String[picture.length];   //initialization of each column
             for (int j = 0; j < picture.length; j++) {
                 column[j] = picture[j][i];
             }
             boolean isRow = false;
-            picture = clueUtilization(gorizLines, column, isRow, picture, i); //the algorithm for checking by columns and by rows is identical, the algorithm is deduced into a separate method
+            clueUtilization(horizLines, column, isRow, picture, i); //the algorithm for checking by columns and by rows is identical, the algorithm is deduced into a separate method
         }
-        return picture;
     }
 
-    private static String[][] usingVertClues(String[][] picture, List<List<Integer>> vertLines) { //check rows
+    private static void usingVertClues(String[][] picture, List<List<Integer>> vertLines) { //check rows
         for (int i = 0; i < picture.length; i++) {    //moving along the y
             String[] row = picture[i];                     //initialization of each row
             boolean isRow = true;
-            picture = clueUtilization(vertLines, row, isRow, picture, i);   //the algorithm for checking by columns and by rows is identical, the algorithm is deduced into a separate method
+            clueUtilization(vertLines, row, isRow, picture, i);   //the algorithm for checking by columns and by rows is identical, the algorithm is deduced into a separate method
         }
-        return picture;
     }
 
-    private static String[][] clueUtilization(List<List<Integer>> gorizLines, String[] line, boolean isRow, String[][] picture, int i) {
-        List<Integer> clues = gorizLines.get(i);       //clues for this row or column
-        int numberFromClue = findNumberFromClue(clues);  //result sum from clues
+    private static void clueUtilization(List<List<Integer>> lines, String[] line, boolean isRow, String[][] picture, int i) {
+        List<Integer> clues = lines.get(i);       //clues for this row or column
+        int numberFromClue = findNumberFromClue(clues, 0, clues.size()-1);  //result sum from clues
 
         int startEmpties = startEmpties(i, picture, line, isRow);         //start spaces
         int endEmpties = endEmpties(i, picture, line, isRow);             //end spaces
 
-        if (numberFromClue > (line.length - startEmpties - endEmpties) / 2 && clues.size() == 1) {
-            int start = line.length - numberFromClue;
-            int end = numberFromClue - 1;
-            for (int j = start; j <= end; j++) {
-                picture = paintCeil(picture, j, i, isRow);
+        if (numberFromClue > (line.length - startEmpties - endEmpties) / 2 && clues.size() == 1) {   //just 1 clue to this column/row
+            int start = line.length - numberFromClue - endEmpties;  //usage in calculations of "empty" boundaries
+            int end = numberFromClue + startEmpties;                //usage in calculations of "empty" boundaries
+            paintCell(picture, i, isRow, start, end);
+
+        } else if (clues.size() > 1) {                              //more than 1 clue to this column/row
+            for (int j = 0; j < clues.size(); j++) {                //painting cells according to the clues
+                int start = line.length - findNumberFromClue(clues, j, clues.size()-1) - endEmpties; //usage in calculations of "empty" boundaries
+                int end = findNumberFromClue(clues, 0, j) + startEmpties; //usage in calculations of "empty" boundaries
+                paintCell(picture, i, isRow, start, end);
+            }
+
+            if (numberFromClue == line.length - startEmpties - endEmpties) {  //empties between clues. This is possible only clues more than 1
+                for (int j = 0; j < clues.size() - 1; j++) {        //it is no space after last clue
+                    int index = findNumberFromClue(clues, 0, j) + startEmpties;
+                    if (isRow) {
+                        picture[i][index] = GAP_CElL;
+                    } else {
+                        picture[index][i] = GAP_CElL;
+                    }
+                }
             }
         }
-        return picture;
     }
 
-    private static int findNumberFromClue(List<Integer> clues) {
+    private static int findNumberFromClue(List<Integer> clues, int start, int end) {
         int numberFromClue = 0;
         if (clues.size() > 1) {
-            for (Integer clue : clues) {
-                numberFromClue += clue + 1;
+            for (int i = start; i <= end; i++) {
+                numberFromClue += clues.get(i) + 1;
             }
             numberFromClue--;
         } else {
@@ -111,10 +131,10 @@ public class _15Nanorramm {
     private static int startEmpties(int numberOfColumnOrRow, String[][] picture, String[] line, boolean isRow) {      // клетки с начала, которые не могут быть окрашены
         for (int j = 0; j < line.length; j++) {
             if (isRow) {
-                if (picture[numberOfColumnOrRow][j] == null || picture[numberOfColumnOrRow][j].equals("X")) //if row is checked
+                if (picture[numberOfColumnOrRow][j] == null || picture[numberOfColumnOrRow][j].equals(FULL_CElL)) //if row is checked
                     return j;
             } else {
-                if (picture[j][numberOfColumnOrRow] == null || picture[j][numberOfColumnOrRow].equals("X"))  //if column is checked
+                if (picture[j][numberOfColumnOrRow] == null || picture[j][numberOfColumnOrRow].equals(FULL_CElL))  //if column is checked
                     return j;
             }
         }
@@ -124,23 +144,25 @@ public class _15Nanorramm {
     private static int endEmpties(int numberOfLine, String[][] picture, String[] line, boolean isRow) {  // клетки с конца, которые не могут быть окрашены
         for (int j = line.length - 1; j >= 0; j--) {
             if (isRow) {
-                if (picture[numberOfLine][j] == null || picture[numberOfLine][j].equals("X"))  //if row is checked
+                if (picture[numberOfLine][j] == null || picture[numberOfLine][j].equals(FULL_CElL))  //if row is checked
                     return line.length - j - 1;
             } else {
-                if (picture[j][numberOfLine] == null || picture[j][numberOfLine].equals("X"))  //if column is checked
+                if (picture[j][numberOfLine] == null || picture[j][numberOfLine].equals(FULL_CElL))  //if column is checked
                     return line.length - j - 1;
             }
         }
         return line.length;
     }
 
-    private static String[][] paintCeil(String[][] picture, int j, int i, boolean isRow) {
-        if (isRow) {
-            picture[i][j] = "X";           //if row is checked
-        } else {
-            picture[j][i] = "X";           //if column is checked
+    private static void paintCell(String[][] picture, int i, boolean isRow, int start, int end) {
+        for (int j = start; j < end; j++) {
+            if (isRow) {
+                picture[i][j] = FULL_CElL;           //if row is checked
+            } else {
+                picture[j][i] = FULL_CElL;           //if column is checked
+            }
         }
-        return picture;
+
     }
 
     private static boolean isSolved(String[][] picture) {   //проверка, решен ли кроссворд
