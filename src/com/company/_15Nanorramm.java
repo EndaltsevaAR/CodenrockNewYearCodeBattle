@@ -7,17 +7,58 @@ public class _15Nanorramm {
     private static final String FULL_CElL = "X   ";   //TEMP!!!
     private static final String GAP_CElL = ".   ";    //TEMP!!!
     private static String[][] picture;   //creating empty array
-    private static List<List<Integer>> numberCluesLinesForColumns = new ArrayList<>();     //horizontal clues for columns from input
-    private static List<List<Integer>> numberCluesLinesForRows = new ArrayList<>();        //vertical clues for columns from input
-    private static List<List<Boolean>> statusCluesLinesForColumns = new ArrayList<>();     //status from each clue: totally used for painting cells or not
-    private static List<List<Boolean>> statusCluesLinesForRows = new ArrayList<>();        //status from each clue: totally used for painting cells or not
-    private static List<Set<Integer>> fulledCellsByColumns = new ArrayList<>();            //numbers of full cells at each column
-    private static List<Set<Integer>> fulledCellsByRows = new ArrayList<>();               //numbers of full cells at each row
-    private static List<Set<Integer>> gapCellsByColumns = new ArrayList<>();             //numbers of empty cells at each column
-    private static List<Set<Integer>> gapCellsByRows = new ArrayList<>();                //numbers of empty cells at each row
+    private static final List<List<Integer>> numberCluesLinesForColumns = new ArrayList<>();     //horizontal clues for columns from input
+    private static final List<List<Integer>> numberCluesLinesForRows = new ArrayList<>();        //vertical clues for columns from input
+    private static final List<List<Boolean>> statusCluesLinesForColumns = new ArrayList<>();     //status from each clue: totally used for painting cells or not
+    private static final List<List<Boolean>> statusCluesLinesForRows = new ArrayList<>();        //status from each clue: totally used for painting cells or not
+    private static final List<Set<Integer>> fulledCellsByColumns = new ArrayList<>();            //numbers of full cells at each column
+    private static final List<Set<Integer>> fulledCellsByRows = new ArrayList<>();               //numbers of full cells at each row
+    private static final List<Set<Integer>> gapCellsByColumns = new ArrayList<>();             //numbers of empty cells at each column
+    private static final List<Set<Integer>> gapCellsByRows = new ArrayList<>();                //numbers of empty cells at each row
 
 
     public static void main(String[] args) {
+        inputFromUser();
+        picture = new String[numberCluesLinesForRows.size()][numberCluesLinesForColumns.size()];
+        initListsByEmptyCollections();   //initialization of fulledCellsByColumns, fulledCellsByRows, gapCellsByColumns, gapCellsByRows, statusCluesLinesForColumns, statusCluesLinesForRows by Empty Collections
+
+        //     while (!isSolved(picture)) {
+        //this is pre-checks of clues
+        usingHorizontalClues();              //pass through horizontal clues
+        usingVerticalClues();                  //pass through vertical clues
+        checkFullUsedHorizontalClues();      //check for fully used hints from horizontal clues
+        checkFullUsedVerticalClues();          //check for fully used hints from vertical clues
+
+        checkUpAndDownBorders();
+        //       checkVerticalBorders();
+
+/*
+Этапы проверок:
+- проверить подсказки, проставить пробелы
+- по списку
+внести в проверку пустые подсказки
+ */
+
+        for (int i = 0; i < picture.length; i++) {  //test
+            for (int j = 0; j < picture[0].length; j++) {
+                System.out.print(picture[i][j] + " ");
+            }
+            System.out.println("");
+        }
+        //   }
+    }
+
+
+    private static boolean isSolved() {   //проверка, решен ли кроссворд
+        for (String[] strings : picture) {
+            for (int j = 0; j < picture[0].length; j++) {
+                if (strings[j] == null) return false;
+            }
+        }
+        return true;
+    }
+
+    private static void inputFromUser() {
         Scanner sc = new Scanner(System.in); //System.in is a standard input stream
         String line = "";
         int countSpaces = 0;
@@ -47,58 +88,28 @@ public class _15Nanorramm {
             }
         }
 
-        picture = new String[numberCluesLinesForRows.size()][numberCluesLinesForColumns.size()];
-        setStatusCluesLinesForColumnsAndRows();
-
-        //     while (!isSolved(picture)) {
-        //this is pre-checks of clues
-        usingHorizontalClues();              //pass through horizontal clues
-        usingVerticalClues();                  //pass through vertical clues
-        //   updateListsOfFullAndEmptyCells();
-        checkFullUsedHorizontalClues();      //check for fully used hints from horizontal clues
-        checkFullUsedVerticalClues();          //check for fully used hints from vertical clues
-
-        checkUpAndDownBorders();
-        //       checkVerticalBorders();
-
-/*
-Этапы проверок:
-- проверить подсказки, проставить пробелы
-- по списку
-
-
-внести в проверку пустые подсказки
- */
-
-
-        for (int i = 0; i < picture.length; i++) {  //test
-            for (int j = 0; j < picture[0].length; j++) {
-                System.out.print(picture[i][j] + " ");
-            }
-            System.out.println("");
-        }
-        //   }
     }
 
-
-    private static boolean isSolved() {   //проверка, решен ли кроссворд
-        for (String[] strings : picture) {
-            for (int j = 0; j < picture[0].length; j++) {
-                if (strings[j] == null) return false;
-            }
-        }
-        return true;
-    }
-
-    private static void setStatusCluesLinesForColumnsAndRows() {
+    private static void initListsByEmptyCollections() {
         for (int i = 0; i < numberCluesLinesForColumns.size(); i++) { //initialization by empty set
-            fulledCellsByColumns.add(new TreeSet<>());
-            gapCellsByColumns.add(new TreeSet<>());
+            fulledCellsByColumns.add(new TreeSet<>());            //init fulledCellsByColumns
+            gapCellsByColumns.add(new TreeSet<>());               //init gapCellsByColumns
+            List<Boolean> statusesOfColumn = new ArrayList<>();   //init statusCluesLinesForColumns
+            for (Integer cell : numberCluesLinesForColumns.get(i)) { //number of status equal number of clue at the column
+                statusesOfColumn.add(false);
+            }
+            statusCluesLinesForColumns.add(statusesOfColumn);
+
         }
 
         for (int i = 0; i < numberCluesLinesForRows.size(); i++) {
-            fulledCellsByRows.add(new TreeSet<>());
-            gapCellsByRows.add(new TreeSet<>());
+            fulledCellsByRows.add(new TreeSet<>());               //init fulledCellsByRows
+            gapCellsByRows.add(new TreeSet<>());                  //init gapCellsByRows
+            List<Boolean> statusesOfRow = new ArrayList<>();   //init statusCluesLinesForColumns
+            for (Integer cell : numberCluesLinesForRows.get(i)) {//number of status equal number of clue at the row
+                statusesOfRow.add(false);
+            }
+            statusCluesLinesForRows.add(statusesOfRow);
         }
     }
 
@@ -149,10 +160,14 @@ public class _15Nanorramm {
                 for (int j = 0; j < clues.size() - 1; j++) {        //it is no space after last clue
                     int index = findNumberFromClue(clues, 0, j) + startGaps;
                     if (isRow) {
-                        picture[numberOfColumnOrRow][index] = GAP_CElL;
+                        picture[numberOfColumnOrRow][index] = GAP_CElL;                //put a gap in the solution picture
+                        gapCellsByColumns.get(numberOfColumnOrRow).add(index);         //put at the gap's column's list index by row
+                        gapCellsByRows.get(index).add(numberOfColumnOrRow);
 
                     } else {
                         picture[index][numberOfColumnOrRow] = GAP_CElL;
+                        gapCellsByColumns.get(index).add(numberOfColumnOrRow);
+                        gapCellsByRows.get(numberOfColumnOrRow).add(index);
                     }
                 }
             }
@@ -181,8 +196,10 @@ public class _15Nanorramm {
             gaps = gapCellsByColumns.get(numberOfColumnOrRow); //for rows
         }
 
-        if (gaps == null || gaps.isEmpty()) return 0;          //if this set is not used yet, it is no gaps at the start of the column/row
-        while (gaps.contains(countOfStartGaps++));             //if gaps not contain number bigger by 1 from previous it means that next cell at the picture is full or not defined
+        if (gaps == null || gaps.isEmpty())
+            return 0;          //if this set is not used yet, it is no gaps at the start of the column/row
+        while (gaps.contains(countOfStartGaps++))
+            ;             //if gaps not contain number bigger by 1 from previous it means that next cell at the picture is full or not defined
         return --countOfStartGaps;                             //it is necessary to zero the last increment of countOfStartGaps
     }
 
@@ -197,7 +214,8 @@ public class _15Nanorramm {
             gaps = gapCellsByColumns.get(numberOfColumnOrRow); //for rows
             endOfLine = picture.length - 1;                     //length starts from 1, not 0
         }
-        if (gaps == null || gaps.isEmpty()) return 0;           //if this set is not used yet, it is no gaps at the start of the column/row
+        if (gaps == null || gaps.isEmpty())
+            return 0;           //if this set is not used yet, it is no gaps at the start of the column/row
         while (gaps.contains(endOfLine--)) {                    //checking from end to start
             countOfStartGaps++;
         }
@@ -208,19 +226,25 @@ public class _15Nanorramm {
         for (int j = start; j < end; j++) {
             if (isRow) {
                 picture[i][j] = FULL_CElL;           //if row is checked
+                fulledCellsByColumns.get(i).add(j); //put a full in the full's lists
+                fulledCellsByRows.get(j).add(i);
             } else {
                 picture[j][i] = FULL_CElL;           //if column is checked
+                fulledCellsByColumns.get(j).add(i);
+                fulledCellsByRows.get(i).add(j);
             }
         }
-
     }
 
     private static void checkFullUsedHorizontalClues() {
         for (int i = 0; i < picture[0].length; i++) {  //moving along the x
             String[] column = getColumn(i);
             boolean isRow = false;
-
-            algorithmOfCheckFullUsedClues(column, lines, i, isRow);  //algorithm for checking horizontal and vertical clues is identical
+            int sumOfFullCells = 0;
+            for (Integer integer : fulledCellsByColumns.get(i)) {
+                sumOfFullCells += integer;
+            }
+            algorithmOfCheckFullUsedClues(column, numberCluesLinesForColumns, i, isRow, sumOfFullCells);  //algorithm for checking horizontal and vertical clues is identical
         }
     }
 
@@ -228,13 +252,15 @@ public class _15Nanorramm {
         for (int i = 0; i < picture.length; i++) {  //moving along the x
             String[] row = picture[i];
             boolean isRow = true;
-
-            algorithmOfCheckFullUsedClues(row, lines, i, isRow);  //algorithm for checking horizontal and vertical clues is identical
+            int sumOfFullCells = 0;
+            for (Integer integer : fulledCellsByRows.get(i)) {
+                sumOfFullCells += integer;
+            }
+            algorithmOfCheckFullUsedClues(row, numberCluesLinesForRows, i, isRow, sumOfFullCells);  //algorithm for checking horizontal and vertical clues is identical
         }
     }
 
-    private static void algorithmOfCheckFullUsedClues(String[] line, List<List<Integer>> lines, int i, boolean isRow) {
-        int paintedCells = getNumberOfPaintedCells(line);
+    private static void algorithmOfCheckFullUsedClues(String[] line, List<List<Integer>> lines, int i, boolean isRow, int paintedCells) {
         int expectedCells = findNumberFromClue(lines.get(i), 0, lines.get(i).size() - 1);
         if (lines.get(i).size() != 1) {
             expectedCells = expectedCells - lines.get(i).size() + 1;
@@ -250,14 +276,6 @@ public class _15Nanorramm {
         }
     }
 
-    private static int getNumberOfPaintedCells(String[] column) {
-        int paintedCells = 0;
-        for (String s : column) {
-            if (s == null) continue;
-            else if (s.equals(FULL_CElL)) paintedCells++;
-        }
-        return paintedCells;
-    }
 
     private static void updateListsOfFullAndEmptyCells() {
         for (int i = 0; i < picture.length; i++) {  //moving along the x
