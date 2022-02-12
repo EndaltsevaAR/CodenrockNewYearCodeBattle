@@ -91,22 +91,21 @@ public class _15Nanorramm {
     }
 
     private static void initListsByEmptyCollections() {
-        for (int i = 0; i < numberCluesLinesForColumns.size(); i++) { //initialization by empty set
+        for (List<Integer> numberCluesLinesForColumn : numberCluesLinesForColumns) { //initialization by empty set
             fulledCellsByColumns.add(new TreeSet<>());            //init fulledCellsByColumns
             gapCellsByColumns.add(new TreeSet<>());               //init gapCellsByColumns
             List<Boolean> statusesOfColumn = new ArrayList<>();   //init statusCluesLinesForColumns
-            for (Integer cell : numberCluesLinesForColumns.get(i)) { //number of status equal number of clue at the column
+            for (Integer cell : numberCluesLinesForColumn) { //number of status equal number of clue at the column
                 statusesOfColumn.add(false);
             }
             statusCluesLinesForColumns.add(statusesOfColumn);
-
         }
 
-        for (int i = 0; i < numberCluesLinesForRows.size(); i++) {
+        for (List<Integer> numberCluesLinesForRow : numberCluesLinesForRows) {
             fulledCellsByRows.add(new TreeSet<>());               //init fulledCellsByRows
             gapCellsByRows.add(new TreeSet<>());                  //init gapCellsByRows
             List<Boolean> statusesOfRow = new ArrayList<>();   //init statusCluesLinesForColumns
-            for (Integer cell : numberCluesLinesForRows.get(i)) {//number of status equal number of clue at the row
+            for (Integer cell : numberCluesLinesForRow) {//number of status equal number of clue at the row
                 statusesOfRow.add(false);
             }
             statusCluesLinesForRows.add(statusesOfRow);
@@ -161,13 +160,13 @@ public class _15Nanorramm {
                     int index = findNumberFromClue(clues, 0, j) + startGaps;
                     if (isRow) {
                         picture[numberOfColumnOrRow][index] = GAP_CElL;                //put a gap in the solution picture
-                        gapCellsByColumns.get(numberOfColumnOrRow).add(index);         //put at the gap's column's list index by row
-                        gapCellsByRows.get(index).add(numberOfColumnOrRow);
+                        gapCellsByColumns.get(index).add(numberOfColumnOrRow);         //put at the gap's column's list index by row
+                        gapCellsByRows.get(numberOfColumnOrRow).add(index);
 
                     } else {
                         picture[index][numberOfColumnOrRow] = GAP_CElL;
-                        gapCellsByColumns.get(index).add(numberOfColumnOrRow);
-                        gapCellsByRows.get(numberOfColumnOrRow).add(index);
+                        gapCellsByColumns.get(numberOfColumnOrRow).add(index);
+                        gapCellsByRows.get(index).add(numberOfColumnOrRow);
                     }
                 }
             }
@@ -176,6 +175,7 @@ public class _15Nanorramm {
 
     private static int findNumberFromClue(List<Integer> clues, int start, int end) {
         int numberFromClue = 0;
+        if (clues.isEmpty()) return numberFromClue;
         if (clues.size() > 1) {
             for (int i = start; i <= end; i++) {
                 numberFromClue += clues.get(i) + 1;
@@ -226,12 +226,12 @@ public class _15Nanorramm {
         for (int j = start; j < end; j++) {
             if (isRow) {
                 picture[i][j] = FULL_CElL;           //if row is checked
-                fulledCellsByColumns.get(i).add(j); //put a full in the full's lists
-                fulledCellsByRows.get(j).add(i);
+                fulledCellsByColumns.get(j).add(i); //put a full in the full's lists
+                fulledCellsByRows.get(i).add(j);
             } else {
                 picture[j][i] = FULL_CElL;           //if column is checked
-                fulledCellsByColumns.get(j).add(i);
-                fulledCellsByRows.get(i).add(j);
+                fulledCellsByColumns.get(i).add(j);
+                fulledCellsByRows.get(j).add(i);
             }
         }
     }
@@ -240,10 +240,7 @@ public class _15Nanorramm {
         for (int i = 0; i < picture[0].length; i++) {  //moving along the x
             String[] column = getColumn(i);
             boolean isRow = false;
-            int sumOfFullCells = 0;
-            for (Integer integer : fulledCellsByColumns.get(i)) {
-                sumOfFullCells += integer;
-            }
+            int sumOfFullCells = fulledCellsByColumns.get(i).size();
             algorithmOfCheckFullUsedClues(column, numberCluesLinesForColumns, i, isRow, sumOfFullCells);  //algorithm for checking horizontal and vertical clues is identical
         }
     }
@@ -252,41 +249,26 @@ public class _15Nanorramm {
         for (int i = 0; i < picture.length; i++) {  //moving along the x
             String[] row = picture[i];
             boolean isRow = true;
-            int sumOfFullCells = 0;
-            for (Integer integer : fulledCellsByRows.get(i)) {
-                sumOfFullCells += integer;
-            }
+            int sumOfFullCells = fulledCellsByRows.get(i).size();
             algorithmOfCheckFullUsedClues(row, numberCluesLinesForRows, i, isRow, sumOfFullCells);  //algorithm for checking horizontal and vertical clues is identical
         }
     }
 
     private static void algorithmOfCheckFullUsedClues(String[] line, List<List<Integer>> lines, int i, boolean isRow, int paintedCells) {
         int expectedCells = findNumberFromClue(lines.get(i), 0, lines.get(i).size() - 1);
-        if (lines.get(i).size() != 1) {
+        if (lines.get(i).size() != 1) {    //if it is not only one clue for all column/row, at the findNumberFromClue we added spaces between clues besides last one. There is need to delete those spaces
             expectedCells = expectedCells - lines.get(i).size() + 1;
         }
         if (paintedCells == expectedCells) {
             for (int j = 0; j < line.length; j++) {
                 if (isRow && picture[i][j] == null) {
                     picture[i][j] = GAP_CElL;
-                } else if (!isRow && picture[j][i] == null) {
-                    picture[j][i] = GAP_CElL;
-                }
-            }
-        }
-    }
-
-
-    private static void updateListsOfFullAndEmptyCells() {
-        for (int i = 0; i < picture.length; i++) {  //moving along the x
-            for (int j = 0; j < picture[0].length; j++) {
-                if (picture[i][j] == null) {
-                } else if (picture[i][j].equals(FULL_CElL)) {
-                    fulledCellsByColumns.get(j).add(i);
-                    fulledCellsByRows.get(i).add(j);
-                } else {
                     gapCellsByColumns.get(j).add(i);
                     gapCellsByRows.get(i).add(j);
+                } else if (!isRow && picture[j][i] == null) {
+                    picture[j][i] = GAP_CElL;
+                    gapCellsByColumns.get(i).add(j);
+                    gapCellsByRows.get(j).add(i);
                 }
             }
         }
