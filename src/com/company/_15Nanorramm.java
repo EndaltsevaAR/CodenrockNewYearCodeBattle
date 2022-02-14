@@ -29,9 +29,8 @@ public class _15Nanorramm {
         checkFullUsedHorizontalClues();      //check for fully used hints from horizontal clues
         checkFullUsedVerticalClues();          //check for fully used hints from vertical clues
 
-        checkUpAndDownBorders();
-        //       checkVerticalBorders();
-
+        //     checkUpAndDownBorders();             //задача решена не до конца. Проверены подсказки, необходимо реализовать алгоритмы проверки границ, пустых дыр и т.д. Методы решения можно посмотреть по ссылке https://www.nonograms.ru/methods
+        //       checkLeftAndRightBorders();
 /*
 Этапы проверок:
 - проверить подсказки, проставить пробелы
@@ -273,8 +272,55 @@ public class _15Nanorramm {
             }
         }
     }
+ // не законченная задача
+    /*private static void checkUpAndDownBorders() {
+        for (int i = 0; i < picture[0].length; i++) {  //moving along the x
+            //simple up border checking
+            String[] column = getColumn(i);
+            boolean isRow = false;
+            int startGaps = startGaps(i, isRow);
+            if (startGaps == column.length - 1) break;
+            if (numberCluesLinesForColumns.get(i).isEmpty()) break; //if there is no clue for this column
+            for (int j = 0; j < statusCluesLinesForColumns.get(i).size(); j++) {
+                boolean clue = statusCluesLinesForColumns.get(i).get(j);
+                if (clue) {    //продвижение границы по уже зачеркнутым подсказкам
+                    while (fulledCellsByColumns.get(i).contains(startGaps++))
+                        ; //если клетка уже закрашена, значит ближайшие от границы закрашенные клетки будут из текущей подсказки
+                    startGaps += startGaps;           //продвигаемся на количество подсказок
+                    if (j != statusCluesLinesForColumns.get(i).size() - 1) { //если это не последняя подсказка, то нужно прибавить пробел после подсказки
+                        startGaps++;
+                    }
+                } else {      //обработка первой незачеркнутой подсказки
+                    for (int k = startGaps; k < numberCluesLinesForColumns.get(i).get(j) + startGaps; k++) {
+                        if (fulledCellsByColumns.get(i).contains(k)) {
+                            for (int l = k; l < numberCluesLinesForColumns.get(i).get(j) + startGaps; l++) {
+                                picture[l][i] = FULL_CElL;
+                                fulledCellsByColumns.get(i).add(l);
+                                fulledCellsByRows.get(l).add(i);
+                                k = l;
+                            }
+                            int distance = 0;
 
-    private static void checkUpAndDownBorders() {
+                            while (!picture[k][i].equals(GAP_CElL) && k < picture.length) {
+                                k++;
+                                distance++;
+                            }
+                            if (distance < numberCluesLinesForColumns.get(i).get(j)) {
+                            boolean afterFull = false;
+                                for (int l = k; l > startGaps; l--) {
+                                    if (picture[l][i] == null && afterFull) picture[l][i] = FULL_CElL;
+                                    if (picture[l][i].equals(FULL_CElL)) afterFull = true;
+                                }
+                                int minFromFull = startGaps;
+                                while (!fulledCellsByColumns.get(i).contains(minFromFull)) {
+                                    minFromFull++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
-    }
+    }*/
 }
